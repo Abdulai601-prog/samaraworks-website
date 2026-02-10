@@ -1,5 +1,7 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth, UserRole } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
+import type { UserRole } from "@/contexts/AuthContext";
+import type { ReactElement } from "react";
 
 type Role = Exclude<UserRole, null>;
 
@@ -7,7 +9,7 @@ export default function ProtectedRoute({
   children,
   allow,
 }: {
-  children: JSX.Element;
+  children: ReactElement;
   allow: Role[];
 }) {
   const { isAuthenticated, user, hasRole } = useAuth();
