@@ -20,39 +20,36 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users for demonstration
-const MOCK_USERS: User[] = [
-  {
-    id: '1',
-    email: 'family@example.com',
-    name: 'Sarah Johnson',
-    role: 'family',
-    householdId: 'hh-001'
-  },
-  {
-    id: '2',
-    email: 'staff@example.com',
-    name: 'Michael Chen',
-    role: 'staff'
-  },
-  {
-    id: '3',
-    email: 'admin@example.com',
-    name: 'Admin User',
-    role: 'admin'
-  }
-];
+/**
+ * Demo auth has been removed for safety.
+ * Until Supabase is connected, login is disabled.
+ *
+ * OPTIONAL (temporary for development only):
+ * Set ENABLE_DEV_MOCK_LOGIN = true to allow a single internal test login.
+ */
+const ENABLE_DEV_MOCK_LOGIN = false;
+
+// Optional: single internal dev user (ONLY if you enable mock login)
+const DEV_USER: User = {
+  id: 'dev-1',
+  email: 'abdulai.mohamed@outlook.com',
+  name: 'Abdulai (Dev)',
+  role: 'admin',
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
-  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
-    // Mock authentication - in production, this would call an API
-    const foundUser = MOCK_USERS.find(u => u.email === email);
-    if (foundUser && password === 'password') {
-      setUser(foundUser);
+  const login = useCallback(async (email: string, _password: string): Promise<boolean> => {
+    // ✅ Production-safe: no fake password, no demo users
+    // Login will be implemented with Supabase Auth next.
+
+    // OPTIONAL dev-only shortcut:
+    if (ENABLE_DEV_MOCK_LOGIN && email.toLowerCase() === DEV_USER.email.toLowerCase()) {
+      setUser(DEV_USER);
       return true;
     }
+
     return false;
   }, []);
 
@@ -62,9 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const hasRole = useCallback((role: UserRole | UserRole[]): boolean => {
     if (!user) return false;
-    if (Array.isArray(role)) {
-      return role.includes(user.role);
-    }
+    if (Array.isArray(role)) return role.includes(user.role);
     return user.role === role;
   }, [user]);
 

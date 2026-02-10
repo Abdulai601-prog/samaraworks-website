@@ -13,8 +13,18 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
+
+  const redirectToPortal = () => {
+    // Role-based routing (real security will come from route guards + Supabase RLS later)
+    const role = user?.role;
+
+    if (role === 'admin') return navigate('/portal/admin');
+    if (role === 'staff') return navigate('/portal/staff');
+    return navigate('/portal/family');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,37 +34,11 @@ export default function LoginPage() {
 
     if (success) {
       toast.success('Welcome back!');
-      // Redirect based on role
-      if (email.includes('admin')) {
-        navigate('/portal/admin');
-      } else if (email.includes('staff')) {
-        navigate('/portal/staff');
-      } else {
-        navigate('/portal/family');
-      }
+      redirectToPortal();
     } else {
-      toast.error('Invalid email or password. Please try again.');
-    }
-
-    setIsLoading(false);
-  };
-
-  const handleDemoLogin = async (demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword('password');
-    setIsLoading(true);
-
-    const success = await login(demoEmail, 'password');
-
-    if (success) {
-      toast.success('Demo login successful!');
-      if (demoEmail.includes('admin')) {
-        navigate('/portal/admin');
-      } else if (demoEmail.includes('staff')) {
-        navigate('/portal/staff');
-      } else {
-        navigate('/portal/family');
-      }
+      toast.error(
+        'Login is not enabled yet. Please contact info@samaraworks.org for access.'
+      );
     }
 
     setIsLoading(false);
@@ -96,6 +80,7 @@ export default function LoginPage() {
                       placeholder="you@example.com"
                       required
                       className="pl-10 rounded-xl border-[#1A1A1A]/10 focus:border-[#F4B233] focus:ring-[#F4B233]"
+                      autoComplete="email"
                     />
                   </div>
                 </div>
@@ -114,11 +99,13 @@ export default function LoginPage() {
                       placeholder="••••••••"
                       required
                       className="pl-10 pr-10 rounded-xl border-[#1A1A1A]/10 focus:border-[#F4B233] focus:ring-[#F4B233]"
+                      autoComplete="current-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6E6A63] hover:text-[#1A1A1A]"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? (
                         <EyeOff className="w-5 h-5" />
@@ -159,40 +146,22 @@ export default function LoginPage() {
                     </>
                   )}
                 </Button>
-              </form>
 
-              {/* Demo Login Options */}
-              <div className="mt-8 pt-6 border-t border-[#1A1A1A]/10">
-                <p className="text-center text-sm text-[#6E6A63] mb-4">
-                  Demo Login (Password: "password")
+                {/* Non-demo help text */}
+                <p className="text-sm text-[#6E6A63] mt-3">
+                  Need access? Email{' '}
+                  <a className="underline" href="mailto:info@samaraworks.org">
+                    info@samaraworks.org
+                  </a>
+                  .
                 </p>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    onClick={() => handleDemoLogin('family@example.com')}
-                    className="px-3 py-2 text-xs font-medium bg-[#F4B233]/20 text-[#1A1A1A] rounded-lg hover:bg-[#F4B233]/30 transition-colors"
-                  >
-                    Family
-                  </button>
-                  <button
-                    onClick={() => handleDemoLogin('staff@example.com')}
-                    className="px-3 py-2 text-xs font-medium bg-[#F4B233]/20 text-[#1A1A1A] rounded-lg hover:bg-[#F4B233]/30 transition-colors"
-                  >
-                    Staff
-                  </button>
-                  <button
-                    onClick={() => handleDemoLogin('admin@example.com')}
-                    className="px-3 py-2 text-xs font-medium bg-[#F4B233]/20 text-[#1A1A1A] rounded-lg hover:bg-[#F4B233]/30 transition-colors"
-                  >
-                    Admin
-                  </button>
-                </div>
-              </div>
+              </form>
             </TabsContent>
 
             <TabsContent value="register">
               <div className="text-center py-8">
                 <p className="text-[#6E6A63] mb-4">
-                  New families can register by completing our Family Support Request form. 
+                  New families can register by completing our Family Support Request form.
                   This will create your account and start your application process.
                 </p>
                 <Link to="/forms/family-support" className="samara-btn-primary inline-flex">
@@ -215,3 +184,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
