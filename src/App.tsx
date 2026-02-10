@@ -1,3 +1,5 @@
+import ProtectedRoute from "@/components/ProtectedRoute";
+import UnauthorizedPage from "@/pages/UnauthorizedPage";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { Toaster } from '@/components/ui/sonner';
@@ -60,21 +62,43 @@ function App() {
               <Route path="/gallery" element={<GalleryPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/donate" element={<DonatePage />} />
-              
+
               {/* Auth Routes */}
               <Route path="/login" element={<LoginPage />} />
-              
-              {/* Portal Routes */}
-              <Route path="/portal/family/*" element={<FamilyPortal />} />
-              <Route path="/portal/staff/*" element={<StaffPortal />} />
-              <Route path="/portal/admin/*" element={<AdminPortal />} />
-              
+              <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
+              {/* Portal Routes (Protected) */}
+              <Route
+                path="/portal/family/*"
+                element={
+                  <ProtectedRoute allow={["family", "staff", "admin"]}>
+                    <FamilyPortal />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/portal/staff/*"
+                element={
+                  <ProtectedRoute allow={["staff", "admin"]}>
+                    <StaffPortal />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/portal/admin/*"
+                element={
+                  <ProtectedRoute allow={["admin"]}>
+                    <AdminPortal />
+                  </ProtectedRoute>
+                }
+              />
+
               {/* Form Routes */}
               <Route path="/forms/family-support" element={<FamilySupportForm />} />
               <Route path="/forms/emergency-assistance" element={<EmergencyAssistanceForm />} />
               <Route path="/forms/volunteer" element={<VolunteerForm />} />
               <Route path="/forms/sponsor-inquiry" element={<SponsorInquiryForm />} />
-              
+
               {/* HIDDEN PAGES - Uncomment below to enable when ready
               {ENABLE_RENTAL_LISTINGS && (
                 <Route path="/rentals" element={<RentalListingsPage />} />
